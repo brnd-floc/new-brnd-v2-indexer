@@ -1047,6 +1047,22 @@ function calculatePrice(claimCount: number): bigint {
   return price;
 }
 
+const sendActivityToBackend = async (activityData: any) => {
+  const apiKey = process.env.INDEXER_API_KEY;
+  const baseUrl =
+    process.env.BACKEND_API_BASE_URL || "https://poiesis.anky.app";
+  if (!apiKey) return;
+
+  await fetch(`${baseUrl}/blockchain-service/collectible-activity`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(activityData),
+  });
+};
+
 /**
  * Generate arrangement hash from brand IDs
  */
@@ -1133,6 +1149,18 @@ ponder.on("BRNDPodiumCollectables:PodiumMinted", async ({ event, context }) => {
     price: price.toString(),
     txHash: transaction.hash,
   });
+  // After creating collectible record, add:
+  await sendActivityToBackend({
+    tokenId: Number(tokenId),
+    eventType: "mint",
+    price: price.toString(),
+    fromFid: Number(ownerFid),
+    toFid: null,
+    fromWallet: wallet,
+    toWallet: null,
+    txHash: transaction.hash,
+    timestamp: Number(block.timestamp),
+  });
 });
 
 // ============================================================================
@@ -1161,6 +1189,8 @@ ponder.on("BRNDPodiumCollectables:PodiumBought", async ({ event, context }) => {
       tokenId: podiumCollectibles.tokenId,
       claimCount: podiumCollectibles.claimCount,
       genesisCreatorFid: podiumCollectibles.genesisCreatorFid,
+      totalFeesEarned: podiumCollectibles.totalFeesEarned,
+      currentOwnerWallet: podiumCollectibles.currentOwnerWallet,
     })
     .from(podiumCollectibles)
     .where(eq(podiumCollectibles.tokenId, Number(tokenId)))
@@ -1290,5 +1320,19 @@ ponder.on("BRNDPodiumCollectables:PodiumBought", async ({ event, context }) => {
     newOwnerWallet: transaction.from,
     price: price.toString(),
     claimCount: newClaimCount,
+    totalFeesEarned: collectibleData.totalFeesEarned?.toString() || "0", // Add this line
+  });
+
+  // After creating collectible record, add:
+  await sendActivityToBackend({
+    tokenId: Number(tokenId),
+    eventType: "sale",
+    price: price.toString(),
+    fromFid: Number(previousOwnerFid),
+    toFid: Number(newOwnerFid),
+    fromWallet: collectibleData.currentOwnerWallet,
+    toWallet: transaction.from,
+    txHash: transaction.hash,
+    timestamp: Number(block.timestamp),
   });
 });
