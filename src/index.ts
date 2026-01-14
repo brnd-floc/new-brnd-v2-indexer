@@ -29,8 +29,6 @@ const sendCollectibleMintToBackend = async (mintData: any) => {
       return;
     }
 
-    console.log("[Indexer] Sending collectible mint to backend:", mintData);
-
     const response = await fetch(
       `${baseUrl}/blockchain-service/collectible-minted`,
       {
@@ -46,17 +44,9 @@ const sendCollectibleMintToBackend = async (mintData: any) => {
     );
 
     if (!response.ok) {
-      console.error(
-        "Failed to send collectible mint:",
-        response.status,
-        await response.text()
-      );
+      console.error("Failed to send collectible mint:", response.status);
     } else {
-      const result = await response.json();
-      console.log(
-        "Collectible mint sent to backend, affected votes:",
-        (result as { affected: number }).affected
-      );
+      console.log("Collectible mint sent to backend");
     }
   } catch (error) {
     console.error("Error sending collectible mint:", error);
@@ -73,8 +63,6 @@ const sendCollectibleBuyToBackend = async (buyData: any) => {
       return;
     }
 
-    console.log("[Indexer] Sending collectible buy to backend:", buyData);
-
     const response = await fetch(
       `${baseUrl}/blockchain-service/collectible-bought`,
       {
@@ -90,17 +78,9 @@ const sendCollectibleBuyToBackend = async (buyData: any) => {
     );
 
     if (!response.ok) {
-      console.error(
-        "Failed to send collectible buy:",
-        response.status,
-        await response.text()
-      );
+      console.error("Failed to send collectible buy:", response.status);
     } else {
-      const result = await response.json();
-      console.log(
-        "Collectible buy sent to backend, affected votes:",
-        (result as { affected: number }).affected
-      );
+      console.log("Collectible buy sent to backend");
     }
   } catch (error) {
     console.error("Error sending collectible buy:", error);
@@ -109,7 +89,6 @@ const sendCollectibleBuyToBackend = async (buyData: any) => {
 
 const sendVoteToBackend = async (voteData: any) => {
   try {
-    console.log("sending vote to backend", voteData);
     const apiKey = process.env.INDEXER_API_KEY;
     const baseUrl =
       process.env.BACKEND_API_BASE_URL || "https://poiesis.anky.app";
@@ -128,16 +107,11 @@ const sendVoteToBackend = async (voteData: any) => {
       },
       body: JSON.stringify(voteData),
     });
-    console.log("response", response);
 
     if (!response.ok) {
-      console.error(
-        "Failed to send vote to backend:",
-        response.status,
-        response.statusText
-      );
+      console.error("Failed to send vote to backend:", response.status);
     } else {
-      console.log("Vote successfully sent to backend");
+      console.log("Vote sent to backend");
     }
   } catch (error) {
     console.error("Error sending vote to backend:", error);
@@ -167,13 +141,9 @@ const sendBrandToBackend = async (brandData: any, endpoint?: string) => {
     });
 
     if (!response.ok) {
-      console.error(
-        "Failed to send brand to backend:",
-        response.status,
-        response.statusText
-      );
+      console.error("Failed to send brand to backend:", response.status);
     } else {
-      console.log("Brand successfully sent to backend");
+      console.log("Brand sent to backend");
     }
   } catch (error) {
     console.error("Error sending brand to backend:", error);
@@ -186,9 +156,7 @@ const sendRewardClaimToBackend = async (rewardClaimData: any) => {
     const baseUrl =
       process.env.BACKEND_API_BASE_URL || "https://poiesis.anky.app";
     if (!apiKey) {
-      console.error(
-        "INDEXER_API_KEY not set - skipping reward claim submission"
-      );
+      console.error("INDEXER_API_KEY not set - skipping reward claim");
       return;
     }
 
@@ -206,13 +174,9 @@ const sendRewardClaimToBackend = async (rewardClaimData: any) => {
     );
 
     if (!response.ok) {
-      console.error(
-        "Failed to send reward claim to backend:",
-        response.status,
-        response.statusText
-      );
+      console.error("Failed to send reward claim:", response.status);
     } else {
-      console.log("Reward claim successfully sent to backend");
+      console.log("Reward claim sent to backend");
     }
   } catch (error) {
     console.error("Error sending reward claim to backend:", error);
@@ -225,9 +189,7 @@ const sendUserLevelUpToBackend = async (userLevelUpData: any) => {
     const baseUrl =
       process.env.BACKEND_API_BASE_URL || "https://poiesis.anky.app";
     if (!apiKey) {
-      console.error(
-        "INDEXER_API_KEY not set - skipping user level-up submission"
-      );
+      console.error("INDEXER_API_KEY not set - skipping user level-up");
       return;
     }
 
@@ -245,13 +207,9 @@ const sendUserLevelUpToBackend = async (userLevelUpData: any) => {
     );
 
     if (!response.ok) {
-      console.error(
-        "Failed to send user level-up to backend:",
-        response.status,
-        response.statusText
-      );
+      console.error("Failed to send user level-up:", response.status);
     } else {
-      console.log("User level-up successfully sent to backend");
+      console.log("User level-up sent to backend");
     }
   } catch (error) {
     console.error("Error sending user level-up to backend:", error);
@@ -264,9 +222,7 @@ const sendLeaderboardSummaryToBackend = async (summaryData: any) => {
     const baseUrl =
       process.env.BACKEND_API_BASE_URL || "https://poiesis.anky.app";
     if (!apiKey) {
-      console.error(
-        "INDEXER_API_KEY not set - skipping leaderboard summary submission"
-      );
+      console.error("INDEXER_API_KEY not set - skipping leaderboard summary");
       return;
     }
 
@@ -284,13 +240,9 @@ const sendLeaderboardSummaryToBackend = async (summaryData: any) => {
     );
 
     if (!response.ok) {
-      console.error(
-        "Failed to send leaderboard summary to backend:",
-        response.status,
-        response.statusText
-      );
+      console.error("Failed to send leaderboard summary:", response.status);
     } else {
-      console.log("Leaderboard summary successfully sent to backend");
+      console.log("Leaderboard summary sent to backend");
     }
   } catch (error) {
     console.error("Error sending leaderboard summary to backend:", error);
@@ -329,7 +281,6 @@ ponder.on("BRNDSEASON1:PodiumCreated", async ({ event, context }) => {
     transactionHash: transaction.hash,
     timestamp: block.timestamp.toString(),
   };
-  console.log("a new vote was cast, sending to backend", voteData);
   await sendVoteToBackend(voteData);
 
   // Use upsert pattern with onConflictDoUpdate
@@ -437,7 +388,6 @@ ponder.on("BRNDSEASON1:BrandCreated", async ({ event, context }) => {
     timestamp: block.timestamp.toString(),
     createdOrUpdated: "created",
   };
-  console.log("a new brand was created", brandData);
   await sendBrandToBackend(brandData);
 });
 
@@ -472,7 +422,6 @@ ponder.on("BRNDSEASON1:BrandsCreated", async ({ event, context }) => {
       timestamp: block.timestamp.toString(),
     };
 
-    console.log("a new brand was created", brandData);
     //await sendBrandToBackend(brandData);
   }
 });
@@ -1022,7 +971,6 @@ ponder.on("BRNDSEASON1:BrandUpdated", async ({ event, context }) => {
       timestamp: block.timestamp.toString(),
       createdOrUpdated: "updated",
     };
-    console.log("a brand was updated", brandData);
     await sendBrandToBackend(brandData);
   }
 });
@@ -1087,10 +1035,6 @@ ponder.on("BRNDPodiumCollectables:PodiumMinted", async ({ event, context }) => {
   const { tokenId, arrangementHash, ownerFid, brandIds, price, wallet } =
     event.args;
   const { block, transaction } = event;
-
-  console.log(
-    `[Collectibles] PodiumMinted: Token #${tokenId} by FID ${ownerFid} at ${wallet}`
-  );
 
   // Create collectible record
   await context.db.insert(podiumCollectibles).values({
@@ -1180,10 +1124,6 @@ ponder.on("BRNDPodiumCollectables:PodiumBought", async ({ event, context }) => {
     protocolFee,
   } = event.args;
   const { block, transaction } = event;
-
-  console.log(
-    `[Collectibles] PodiumBought: Token #${tokenId} by FID ${newOwnerFid} for ${price}`
-  );
 
   // Get collectible data
   const collectible = await context.db.sql
