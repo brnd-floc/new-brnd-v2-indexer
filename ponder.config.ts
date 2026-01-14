@@ -11,10 +11,10 @@ export default createConfig({
     },
   },
 
-  database: {
-    kind: "postgres",
-    connectionString: process.env.DATABASE_URL!,
-  },
+  // database: {
+  //   kind: "postgres",
+  //   connectionString: process.env.DATABASE_URL!,
+  // },
   contracts: {
     BRNDSEASON1: {
       chain: "base",

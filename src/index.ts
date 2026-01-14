@@ -1058,6 +1058,8 @@ const sendActivityToBackend = async (activityData: any) => {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
+      "X-Indexer-Source":
+        process.env.INDEXER_SOURCE || "ponder-stories-in-motion-v8", // Add this line
     },
     body: JSON.stringify(activityData),
   });
