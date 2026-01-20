@@ -15,7 +15,6 @@ import {
   allTimeBrandLeaderboard,
   podiumCollectibles,
   collectibleOwnershipHistory,
-  claimableBalances,
   collectibleSales,
 } from "../ponder.schema";
 
@@ -1036,7 +1035,7 @@ function getArrangementHash(
 // ============================================================================
 
 ponder.on("BRNDPodiumCollectables:PodiumMinted", async ({ event, context }) => {
-  const { tokenId, arrangementHash, ownerFid, brandIds, price, wallet } =
+  const { tokenId, arrangementHash, ownerFid, brandIds, price, wallet, metadataURI } =
     event.args;
   const { block, transaction } = event;
 
@@ -1098,6 +1097,7 @@ ponder.on("BRNDPodiumCollectables:PodiumMinted", async ({ event, context }) => {
     ownerWallet: wallet,
     price: price.toString(),
     txHash: transaction.hash,
+    metadataURI,
   });
   // After creating collectible record, add:
   await sendActivityToBackend({
@@ -1183,57 +1183,6 @@ ponder.on("BRNDPodiumCollectables:PodiumBought", async ({ event, context }) => {
     transactionHash: transaction.hash,
     timestamp: block.timestamp,
   });
-
-  // Update seller's claimable proceeds (pull payment pattern)
-  const existingSellerBalance = await context.db.find(claimableBalances, {
-    fid: Number(previousOwnerFid),
-  });
-
-  if (existingSellerBalance) {
-    await context.db
-      .update(claimableBalances, { fid: Number(previousOwnerFid) })
-      .set({
-        saleProceeds: existingSellerBalance.saleProceeds + sellerProceeds,
-        lastUpdated: block.timestamp,
-      });
-  } else {
-    await context.db.insert(claimableBalances).values({
-      fid: Number(previousOwnerFid),
-      saleProceeds: sellerProceeds,
-      genesisRoyalties: 0n,
-      lastUpdated: block.timestamp,
-      totalProceedsClaimed: 0n,
-      totalRoyaltiesClaimed: 0n,
-    });
-  }
-
-  // Update genesis creator's claimable royalties (if not selling to themselves)
-  if (genesisRoyalty > 0n && collectibleData.genesisCreatorFid) {
-    const existingGenesisBalance = await context.db.find(claimableBalances, {
-      fid: Number(collectibleData.genesisCreatorFid),
-    });
-
-    if (existingGenesisBalance) {
-      await context.db
-        .update(claimableBalances, {
-          fid: Number(collectibleData.genesisCreatorFid),
-        })
-        .set({
-          genesisRoyalties:
-            existingGenesisBalance.genesisRoyalties + genesisRoyalty,
-          lastUpdated: block.timestamp,
-        });
-    } else {
-      await context.db.insert(claimableBalances).values({
-        fid: Number(collectibleData.genesisCreatorFid),
-        saleProceeds: 0n,
-        genesisRoyalties: genesisRoyalty,
-        lastUpdated: block.timestamp,
-        totalProceedsClaimed: 0n,
-        totalRoyaltiesClaimed: 0n,
-      });
-    }
-  }
 
   // Create ownership history record
   await context.db.insert(collectibleOwnershipHistory).values({

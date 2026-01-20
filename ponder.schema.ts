@@ -255,44 +255,6 @@ export const collectibleRepeatFees = onchainTable(
 );
 
 /**
- * Claimable Balances
- * Tracks unclaimed BRND from sales and royalties
- */
-export const claimableBalances = onchainTable("claimable_balances", (t) => ({
-  fid: t.integer().primaryKey(),
-
-  // Separate balance types
-  saleProceeds: t.bigint().notNull().default(0n), // From selling collectibles
-  genesisRoyalties: t.bigint().notNull().default(0n), // From being genesis creator
-
-  // Metadata
-  lastUpdated: t.bigint().notNull(),
-  totalProceedsClaimed: t.bigint().notNull().default(0n), // Lifetime
-  totalRoyaltiesClaimed: t.bigint().notNull().default(0n), // Lifetime
-}));
-
-/**
- * Balance Claims History
- * Record of all proceeds/royalty claims
- */
-export const balanceClaims = onchainTable("balance_claims", (t) => ({
-  id: t.text().primaryKey(), // txHash
-
-  fid: t.integer().notNull(),
-  wallet: t.text().notNull(),
-
-  // What was claimed
-  proceedsAmount: t.bigint().notNull().default(0n),
-  royaltiesAmount: t.bigint().notNull().default(0n),
-  totalAmount: t.bigint().notNull(), // proceeds + royalties
-
-  // Blockchain data
-  blockNumber: t.bigint().notNull(),
-  transactionHash: t.text().notNull(),
-  timestamp: t.bigint().notNull(),
-}));
-
-/**
  * Collectible Ownership History
  * Full ownership chain for each NFT
  */
